@@ -1,0 +1,308 @@
+datasource db {
+  provider = "postgresql"
+  url      = "postgres://ooformsdb_user:DHRgFt0sgmkZY7gyPL6ZHeA4V2DkdDBc@dpg-cdp10cun6mpuqru1usb0-a.frankfurt-postgres.render.com/ooformsdb"
+  //"postgresql://postgres: @localhost:5432/Prisma"
+  //"postgres://gbiaxzdvtjfyyw:b382d151cdec89ae82125c1c10965a8a0646c45e2753cad625f887c1d6b0852c@ec2-3-217-14-181.compute-1.amazonaws.com:5432/d53hduao3h470"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Brokers {
+  broker_id       Int       @id @default(autoincrement())
+  name            String
+  link            String
+  req_auth_date   String
+  created_at_date DateTime  @default(now())
+  updated_at_date DateTime?
+}
+
+model Company {
+  company_id      Int       @id @default(autoincrement())
+  created_at_date DateTime  @default(now())
+  updated_at_date DateTime?
+  company_name    String?
+  address         String?
+  city_state_zip  String?
+  mc_number       String?
+  dot_number      String?
+  ein             String?
+  contact_person  String?
+  person_position String?
+  phone           String?
+  email           String?
+  corporation     String?
+  eld             String?
+  rmis_id         String?
+  duns            String?
+  scac_code       String?
+
+  // ================= INSURANCE =================
+  i_hasPortal         Boolean
+  i_portalLink        String?
+  i_portalUsername    String?
+  i_portalPassword    String?
+  i_name              String?
+  i_address           String?
+  i_city_state_zip    String?
+  i_phone             String?
+  i_fax               String?
+  i_agent             String?
+  i_email             String?
+  cargo_policy_number String?
+  auto_policy_number  String?
+  i_effectiveDate     String?
+  i_expirationDate    String?
+  // ================= FACTORING =================
+  f_method            String?
+  f_name              String?
+  f_account           String?
+  f_routing           String?
+  f_email             String?
+  f_phone             String?
+  f_fax               String?
+  f_address           String?
+  f_city_state_zip    String?
+
+  //=========Documents===============
+  Documents Documents[] //
+
+  //============Relations=========
+  //can be empty this is what this orm has for unidirectional mapping
+  RateCon            RateCon[]
+  Customers          Customers[] //
+  Packets            Packets[]
+  Credentials        Credentials[] //
+  TruckInfo          TruckInfo[] //
+  AdditionalContacts AdditionalContacts[] //
+  Invoice            Invoice[]
+}
+
+model genericPw {
+  pw_id           Int       @id @default(autoincrement())
+  password        String    @unique
+  created_at_date DateTime  @default(now())
+  updated_at_date DateTime?
+}
+
+model registration {
+  r_id            Int       @id @default(autoincrement())
+  fullName        String
+  phoneNumber     String
+  email           String
+  CompanyName     String
+  created_at_date DateTime  @default(now())
+  updated_at_date DateTime?
+}
+
+model TruckInfo {
+  // ================= TRUCK INFO =================
+  //cant have arrays without seperate tables in this orm
+  //array
+  truckInfo_id      Int       @id @default(autoincrement())
+  trailer_no        String?
+  truck_no          String?
+  model_trailer     String?
+  year_trailer      String?
+  size_trailer      String?
+  type_trailer      String?
+  additional_info   String?
+  Company           Company?  @relation(fields: [companyCompany_id], references: [company_id])
+  companyCompany_id Int?
+  created_at_date   DateTime  @default(now())
+  updated_at_date   DateTime?
+}
+
+model AdditionalContacts {
+  //==================ADDITIONAL CONTACTS=================
+  //array gideta
+  additional_cId           Int       @id @default(autoincrement())
+  title                    String?
+  additional_contactName   String?
+  additional_phone         String?
+  additional_truckNumber   String?
+  additional_trailerNumber String?
+  Company                  Company?  @relation(fields: [companyCompany_id], references: [company_id])
+  companyCompany_id        Int?
+  created_at_date          DateTime  @default(now())
+  updated_at_date          DateTime?
+}
+
+model Credentials {
+  //============Credentials=======
+  //array
+  c_id              Int       @id @default(autoincrement())
+  c_name            String?
+  c_email           String?
+  c_password        String?
+  Company           Company?  @relation(fields: [companyCompany_id], references: [company_id])
+  companyCompany_id Int?
+  created_at_date   DateTime  @default(now())
+  updated_at_date   DateTime?
+}
+
+model Documents {
+  document_id       Int      @id @default(autoincrement())
+  documents         String
+  Company           Company? @relation(fields: [companyCompany_id], references: [company_id])
+  companyCompany_id Int?
+}
+
+model References {
+  reference_id    Int       @id @default(autoincrement())
+  broker_name     String
+  agent_name      String
+  phone_number    String
+  email           String
+  created_at_date DateTime  @default(now())
+  updated_at_date DateTime?
+}
+
+model UserStatus {
+  id              Int       @id @default(autoincrement())
+  name            String
+  Users           Users[]
+  created_at_date DateTime  @default(now())
+  updated_at_date DateTime?
+}
+
+model Users {
+  user_id         Int             @id @default(autoincrement())
+  user_email      String          @unique
+  user_password   String
+  status          UserStatus      @relation(fields: [statusId], references: [id])
+  Password_reset  Password_reset?
+  Customers       Customers?
+  Employees       Employees?
+  statusId        Int
+  created_at_date DateTime        @default(now())
+  updated_at_date DateTime?
+}
+
+model Password_reset {
+  reset_id        Int      @id @default(autoincrement())
+  person_name     Users    @relation(fields: [usersUser_id], references: [user_id])
+  reset_link      String
+  status          Boolean
+  created_at_date DateTime @default(now())
+  usersUser_id    Int      @unique
+}
+
+model Customer_roles {
+  id              Int         @id @default(autoincrement())
+  name            String
+  created_at_date DateTime    @default(now())
+  updated_at_date DateTime
+  Customers       Customers[]
+}
+
+//should repopulate fields from customer
+model Customers {
+  customer_id       Int            @id @default(autoincrement())
+  name              String
+  phone_number      String
+  email             String         @unique
+  provided_email    String?
+  DOT_number        String
+  role              Customer_roles @relation(fields: [roleId], references: [id])
+  user              Users          @relation(fields: [usersUser_id], references: [user_id], onDelete: Cascade)
+  roleId            Int
+  usersUser_id      Int            @unique
+  Company           Company        @relation(fields: [companyCompany_id], references: [company_id])
+  companyCompany_id Int
+  created_at_date   DateTime       @default(now())
+  updated_at_date   DateTime?
+}
+
+model Packet_Status {
+  id              Int       @id @default(autoincrement())
+  name            String
+  created_at_date DateTime  @default(now())
+  updated_at_date DateTime?
+  Packets         Packets[]
+}
+
+model Packets {
+  packet_id            Int           @id @default(autoincrement())
+  status               Packet_Status @relation(fields: [status_id], references: [id])
+  created_at_date      DateTime      @default(now())
+  updated_at_date      DateTime?
+  agent_id             Employees?    @relation(fields: [employeesEmployee_id], references: [employee_id])
+  employeesEmployee_id Int?          @unique
+  status_id            Int
+  company              Company?      @relation(fields: [companyCompany_id], references: [company_id])
+  companyCompany_id    Int?
+}
+
+model Employee_levels {
+  id              Int         @id @default(autoincrement())
+  name            String
+  Employees       Employees[]
+  created_at_date DateTime    @default(now())
+  updated_at_date DateTime?
+}
+
+model Employees {
+  employee_id     Int             @id @default(autoincrement())
+  name            String
+  phone_number    String
+  email           String
+  level           Employee_levels @relation(fields: [levelId], references: [id])
+  user            Users           @relation(fields: [usersUser_id], references: [user_id])
+  usersUser_id    Int             @unique
+  levelId         Int
+  Packets         Packets?
+  created_at_date DateTime        @default(now())
+  updated_at_date DateTime?
+  RateCon         RateCon[]
+  Invoice         Invoice[]
+}
+
+model RateCon_status {
+  id              Int       @id @default(autoincrement())
+  name            String
+  RateCon         RateCon[]
+  created_at_date DateTime  @default(now())
+  updated_at_date DateTime?
+  Invoice         Invoice[]
+}
+
+model RateCon {
+  ratecon_id           Int            @id @default(autoincrement())
+  ratecon_from         Company        @relation(fields: [companyCompany_id], references: [company_id])
+  status               RateCon_status @relation(fields: [status_id], references: [id])
+  status_id            Int
+  companyCompany_id    Int
+  agent_id             Employees?     @relation(fields: [employeesEmployee_id], references: [employee_id])
+  employeesEmployee_id Int?           @unique
+  created_at_date      DateTime       @default(now())
+  updated_at_date      DateTime?
+}
+
+model Invoice {
+  invoice_id           Int            @id @default(autoincrement())
+  invoice_from         Company        @relation(fields: [companyCompany_id], references: [company_id])
+  status               RateCon_status @relation(fields: [status_id], references: [id])
+  status_id            Int
+  companyCompany_id    Int
+  agent_id             Employees?     @relation(fields: [employeesEmployee_id], references: [employee_id])
+  employeesEmployee_id Int?           @unique
+  created_at_date      DateTime       @default(now())
+  updated_at_date      DateTime?
+}
+
+model Kpi {
+  kpi_Id Int @id @default(autoincrement())
+}
+
+model Message{
+  messageId Int @id @default(autoincrement())
+  message String
+  room    String
+  from Int
+  to Int?
+  isText Boolean
+  username String
+  timestamp DateTime @default(now())
+}
